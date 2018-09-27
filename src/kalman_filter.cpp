@@ -1,4 +1,5 @@
 #include "kalman_filter.h"
+#include <math.h>  
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -62,7 +63,36 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   float vy = x_[3];
   
   // first we map cartesian x_ into polar representation h_x
-  VectorXd h_x;
-  h_x  = VectorXd(3);
-  h_x[0] << 
+  VectorXd h_x = VectorXd(3);
+  h_x[0] << sqrt(px*px + py*py);
+  h_x[1] << atan2(py / px);
+  h_x[2] << 0; // avoiding division by zero
+  if(h_x[0]>0.0001){
+    h_x[2] << (px*vx + py+vy) / h_x[0];
+  }
+ 
+  VectorXd y = VectorXd(3);
+  y = z - h_x;
+  // normalize predicted phi value to -pi to pi range
+  float phi = y[1];
+  const float  PI_F=3.14159265358979f;
+  while(phi>PI_F){
+      phi -= 2*PI_F;
+  };
+  while(phi<-PI_F){
+      phi += 2*PI_F;
+  };
+  y[1] << phi;  
+
+  MatrixXd Ht = H_.transpose();
+  MatrixXd S = H_ * P_ * Ht + R_;
+  MatrixXd Si = S.inverse();
+  MatrixXd PHt = P_ * Ht;
+  MatrixXd K = PHt * Si;
+
+  //new estimate
+  x_ = x_ + (K * y);
+  long x_size = x_.size();
+  MatrixXd I = MatrixXd::Identity(x_size, x_size);
+  P_ = (I - K * H_) * P_;
 }
