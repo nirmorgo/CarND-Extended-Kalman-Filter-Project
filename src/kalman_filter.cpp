@@ -64,11 +64,11 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   
   // first we map cartesian x_ into polar representation h_x
   VectorXd h_x = VectorXd(3);
-  h_x[0] << sqrt(px*px + py*py);
-  h_x[1] << atan2(py / px);
-  h_x[2] << 0; // avoiding division by zero
+  h_x[0] = sqrt(px*px + py*py);
+  h_x[1] = atan2(py, px);
+  h_x[2] = 0; // avoiding division by zero
   if(h_x[0]>0.0001){
-    h_x[2] << (px*vx + py+vy) / h_x[0];
+    h_x[2] = (px*vx + py+vy) / h_x[0];
   }
  
   VectorXd y = VectorXd(3);
@@ -82,7 +82,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   while(phi<-PI_F){
       phi += 2*PI_F;
   };
-  y[1] << phi;  
+  y[1] = phi;  
 
   MatrixXd Ht = H_.transpose();
   MatrixXd S = H_ * P_ * Ht + R_;
