@@ -7,6 +7,7 @@ using namespace std;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using std::vector;
+using namespace std;
 
 /*
  * Constructor.
