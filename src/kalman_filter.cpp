@@ -70,17 +70,15 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   if(h_x[0]>0.0001){
     h_x[2] = (px*vx + py+vy) / h_x[0];
   }
- 
-  VectorXd y = VectorXd(3);
-  y = z - h_x;
+  
+  VectorXd y = z - h_x;
   // normalize predicted phi value to -pi to pi range
   float phi = y[1];
-  const float  PI_F=3.14159265358979f;
-  while(phi>PI_F){
-      phi -= 2*PI_F;
+  while (phi>M_PI){
+      phi -= 2*M_PI;
   };
-  while(phi<-PI_F){
-      phi += 2*PI_F;
+  while(phi<-M_PI){
+      phi += 2*M_PI;
   };
   y[1] = phi;  
 
