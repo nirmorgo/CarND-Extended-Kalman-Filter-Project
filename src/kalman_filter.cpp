@@ -23,10 +23,7 @@ void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
 }
 
 void KalmanFilter::Predict() {
-  /**
-  TODO:
-    * predict the state
-  */
+  // predict the state
   x_ = F_ * x_;
   MatrixXd Ft = F_.transpose();
   P_ = F_ * P_ * Ft + Q_;
@@ -63,24 +60,23 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   float vy = x_[3];
   
   // first we map cartesian x_ into polar representation h_x
-  VectorXd h_x = VectorXd(3);
-  h_x[0] = sqrt(px*px + py*py);
-  h_x[1] = atan2(py, px);
-  h_x[2] = 0; // avoiding division by zero
-  if(h_x[0]>0.0001){
-    h_x[2] = (px*vx + py+vy) / h_x[0];
+  float rho = sqrt(px*px + py*py);
+  float phi = atan2(py, px);
+  float rhodot = 0; // avoid division by zero
+  if(rho > 0.0001) {
+      rhodot = (px*vx + py*vy) / rho;
   }
+  
+  VectorXd h_x = VectorXd(3);
+  h_x << rho, phi, rhodot;
   
   VectorXd y = z - h_x;
   // normalize predicted phi value to -pi to pi range
-  float phi = y[1];
-  while (phi>M_PI){
-      phi -= 2*M_PI;
-  };
-  while(phi<-M_PI){
-      phi += 2*M_PI;
-  };
-  y[1] = phi;  
+   y(1) = fmod(y(1) + M_PI, 2*M_PI);
+    if (y(1) < 0) {
+        y(1) += 2*M_PI;
+    }
+    y(1) -= M_PI; 
 
   MatrixXd Ht = H_.transpose();
   MatrixXd S = H_ * P_ * Ht + R_;
@@ -90,7 +86,6 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 
   //new estimate
   x_ = x_ + (K * y);
-  long x_size = x_.size();
-  MatrixXd I = MatrixXd::Identity(x_size, x_size);
+  MatrixXd I = MatrixXd::Identity(4, 4);
   P_ = (I - K * H_) * P_;
 }
