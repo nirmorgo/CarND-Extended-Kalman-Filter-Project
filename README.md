@@ -78,6 +78,6 @@ In [src/FusionEKF.cpp](./src/FusionEKF.cpp) (lines 152-162), you can see that th
 * For RADAR data we linearize the data by calculating the Jacobian matrix and update the state with the Extended Kalman Filter equations [src/kalman_filter.cpp](./src/kalman_filter.cpp) (lines 52-91)
 
 ### Code Efficiency
-#### - Your algorithm should avoid unnecessary calculations.
+#### - Algorithm should avoid unnecessary calculations.
 I tried to make the code more efficient by making sure that more complicated calculations will be done only once, saved into a variable, and then be reused if needed. An example of this approach can be seen in [src/tools.cpp](./src/tools.cpp) (lines 51-84) where the Jacobian is calculated. The square root operation is done only once and saved into "c2" (line 69) which later is reused to canstruct the matrix.
 
